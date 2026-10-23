@@ -1,0 +1,35 @@
+name: Build CineLux APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'CineLux_Flutter_Source.zip'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download source
+        uses: actions/checkout@v4
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Extract source
+        run: |
+          unzip CineLux_Flutter_Source.zip
+          cd cinelux_flutter
+          flutter create --platforms=android --project-name cinelux .
+          flutter pub get
+          flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CineLux-APK
+          path: cinelux_flutter/build/app/outputs/flutter-apk/app-release.apk
